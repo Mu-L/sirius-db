@@ -367,14 +367,14 @@ SinkResultType GPUPhysicalMaterializedCollector::Sink(GPUIntermediateRelation &i
 			}
 			
 			if (materialized_relation.columns[col]->data_wrapper.validity_mask == nullptr) {
-				SIRIUS_LOG_DEBUG("Column {} has no validity mask, creating a mask with all valid values\n", col);
+				SIRIUS_LOG_DEBUG("Column {} has no validity mask, creating a mask with all valid values", col);
 				uint64_t padded_bytes = getMaskBytesSize(materialized_relation.columns[col]->column_length);
 				// If the validity mask is null, we create a mask with all valid values
 				host_mask_data[col] = gpuBufferManager->customCudaHostAlloc<uint8_t>(padded_bytes);
 				memset(host_mask_data[col], 0xFF, padded_bytes); // All bits set to 1 (valid)
 			} else {
 				// Copy the existing validity mask
-				SIRIUS_LOG_DEBUG("Copying validity mask for column {}\n", col);
+				SIRIUS_LOG_DEBUG("Copying validity mask for column {}", col);
 				host_mask_data[col] = gpuBufferManager->customCudaHostAlloc<uint8_t>(materialized_relation.columns[col]->data_wrapper.mask_bytes);
 				callCudaMemcpyDeviceToHost<uint8_t>(host_mask_data[col], reinterpret_cast<uint8_t*>(materialized_relation.columns[col]->data_wrapper.validity_mask), materialized_relation.columns[col]->data_wrapper.mask_bytes, 0);
 			}
@@ -386,7 +386,7 @@ SinkResultType GPUPhysicalMaterializedCollector::Sink(GPUIntermediateRelation &i
 			materialized_relation.columns[col] = str_column;
 			is_string = true;
 			if (str_column->data_wrapper.validity_mask == nullptr) {
-				SIRIUS_LOG_DEBUG("Column {} has no validity mask, creating a mask with all valid values\n", col);
+				SIRIUS_LOG_DEBUG("Column {} has no validity mask, creating a mask with all valid values", col);
 				// printf("Column %d has no validity mask, creating a mask with all valid values\n", col);
 				uint64_t padded_bytes = getMaskBytesSize(str_column->column_length);
 				// If the validity mask is null, we create a mask with all valid values
@@ -394,7 +394,7 @@ SinkResultType GPUPhysicalMaterializedCollector::Sink(GPUIntermediateRelation &i
 				memset(host_mask_data[col], 0xFF, padded_bytes); // All bits set to 1 (valid)
 			} else {
 				// Copy the existing validity mask
-				SIRIUS_LOG_DEBUG("Copying validity mask for column {}\n", col);
+				SIRIUS_LOG_DEBUG("Copying validity mask for column {}", col);
 				host_mask_data[col] = gpuBufferManager->customCudaHostAlloc<uint8_t>(str_column->data_wrapper.mask_bytes);
 				callCudaMemcpyDeviceToHost<uint8_t>(host_mask_data[col], reinterpret_cast<uint8_t*>(str_column->data_wrapper.validity_mask), str_column->data_wrapper.mask_bytes, 0);
 			}
@@ -457,7 +457,8 @@ SinkResultType GPUPhysicalMaterializedCollector::Sink(GPUIntermediateRelation &i
 	//measure time
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-	SIRIUS_LOG_DEBUG("Result collector time: {:.2f} ms", duration.count()/1000.0);
+	SIRIUS_LOG_DEBUG("Measure Result Collector time: {:.2f} ms\n", duration.count()/1000.0);
+	printf("Measure Result Collector time: %.2f ms\n", duration.count()/1000.0);
 	return SinkResultType::FINISHED;
 }
 

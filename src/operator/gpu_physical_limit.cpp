@@ -30,6 +30,7 @@ GPUPhysicalStreamingLimit::GPUPhysicalStreamingLimit(vector<LogicalType> types, 
 OperatorResultType 
 GPUPhysicalStreamingLimit::Execute(GPUIntermediateRelation &input_relation, GPUIntermediateRelation &output_relation) const {
 
+  auto start = std::chrono::high_resolution_clock::now();
 	SIRIUS_LOG_DEBUG("Executing streaming limit");
   // SIRIUS_LOG_DEBUG("limit type: {}", limit_val.Type());
   SIRIUS_LOG_DEBUG("Limit value {}", limit_val.GetConstantValue());
@@ -58,6 +59,11 @@ GPUPhysicalStreamingLimit::Execute(GPUIntermediateRelation &input_relation, GPUI
     }
     SIRIUS_LOG_DEBUG("Column {} has {} rows", col_idx, output_relation.columns[col_idx]->column_length);
 	}
+
+  auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	SIRIUS_LOG_DEBUG("Measure Execute Limit time: {:.2f} ms", duration.count()/1000.0);
+  printf("Measure Limit time: %.2f ms\n", duration.count()/1000.0);
 
   return OperatorResultType::FINISHED;
 }

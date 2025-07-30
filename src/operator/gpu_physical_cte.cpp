@@ -90,6 +90,7 @@ SinkResultType GPUPhysicalCTE::Sink(GPUIntermediateRelation &input_relation) con
 	// lstate.lhs_data.Append(lstate.append_state, chunk);
 
 	// return SinkResultType::NEED_MORE_INPUT;
+	auto start = std::chrono::high_resolution_clock::now();
 	SIRIUS_LOG_DEBUG("Sinking data into CTE");
 	GPUBufferManager* gpuBufferManager = &(GPUBufferManager::GetInstance());
 	for (int col_idx = 0; col_idx < input_relation.columns.size(); col_idx++) {
@@ -102,6 +103,10 @@ SinkResultType GPUPhysicalCTE::Sink(GPUIntermediateRelation &input_relation) con
 			gpuBufferManager->lockAllocation(working_table_gpu->columns[col_idx]->data_wrapper.offset, 0);
 		}
 	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	SIRIUS_LOG_DEBUG("Measure Sinking data into CTE time: {:.2f} ms", duration.count()/1000.0);
     return SinkResultType::FINISHED;
 }
 

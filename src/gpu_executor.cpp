@@ -125,6 +125,7 @@ void GPUExecutor::Execute() {
 			table_scan.GetDataDuckDB(exec_context);
 		}
 		pipeline->source->GetData(*source_relation);
+		SIRIUS_LOG_DEBUG("\n");
 		// SIRIUS_LOG_DEBUG("source relation size {}", source_relation->columns.size());
 		// for (auto col : source_relation->columns) {
 		// 	SIRIUS_LOG_DEBUG("source relation column size {} column name {}", col->column_length, col->name);
@@ -158,6 +159,7 @@ void GPUExecutor::Execute() {
 			//                                        *intermediate_states[current_intermediate - 1]);
 
 			auto result = current_operator.get().Execute(*prev_relation, *current_relation);
+			SIRIUS_LOG_DEBUG("\n");
 			// EndOperator(current_operator, &current_chunk);
 		}
 		if (pipeline->sink) {
@@ -178,6 +180,7 @@ void GPUExecutor::Execute() {
 			// OperatorSinkInput sink_input {*pipeline->sink->sink_state, *local_sink_state, interrupt_state};
 			// pipeline->sink->Sink(exec_context, *sink_relation, sink_input);
 			pipeline->sink->Sink(*sink_relation);
+			SIRIUS_LOG_DEBUG("\n");
 		}
 	}
 }

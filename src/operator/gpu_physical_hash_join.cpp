@@ -573,7 +573,8 @@ GPUPhysicalHashJoin::Execute(GPUIntermediateRelation &input_relation, GPUInterme
 	}
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-	SIRIUS_LOG_DEBUG("Hash Join Execute time: {:.2f} ms", duration.count()/1000.0);
+	SIRIUS_LOG_DEBUG("Measure Hash Join Execute time: {:.2f} ms", duration.count()/1000.0);
+	printf("Measure Join time: %.2f ms\n", duration.count()/1000.0);
 
     return OperatorResultType::FINISHED;
 };
@@ -652,7 +653,8 @@ GPUPhysicalHashJoin::Sink(GPUIntermediateRelation &input_relation) const {
 
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-	SIRIUS_LOG_DEBUG("Hash Join Sink time: {:.2f} ms", duration.count()/1000.0);
+	SIRIUS_LOG_DEBUG("Measure Hash Join Sink time: {:.2f} ms", duration.count()/1000.0);
+	printf("Measure Join time: %.2f ms\n", duration.count()/1000.0);
 
     return SinkResultType::FINISHED;
 };

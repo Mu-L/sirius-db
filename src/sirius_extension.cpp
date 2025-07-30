@@ -179,6 +179,7 @@ SiriusExtension::GPUProcessingBind(ClientContext &context, TableFunctionBindInpu
 	if (input.inputs[0].IsNull()) {
 		throw BinderException("gpu_processing cannot be called with a NULL parameter");
 	}
+	auto start = std::chrono::high_resolution_clock::now();
 
 	//Parse the query just to get the result type information and to create preparedstatmement data
 	auto statements = result->conn->context->ParseStatements(result->query);
@@ -217,6 +218,9 @@ SiriusExtension::GPUProcessingBind(ClientContext &context, TableFunctionBindInpu
 		return_types.emplace_back(type);
 	}
 
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	printf("Parse and Optimize time: %.2f ms\n", duration.count()/1000.0);
 	return std::move(result);
 }
 
@@ -244,7 +248,8 @@ void SiriusExtension::GPUProcessingFunction(ClientContext &context, TableFunctio
 		}
 		auto end = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-		SIRIUS_LOG_INFO("Execute query time: {:.2f} ms", duration.count()/1000.0);
+		// SIRIUS_LOG_INFO("Execute query time: {:.2f} ms", duration.count()/1000.0);
+		printf("Execute query time: %.2f ms\n", duration.count()/1000.0);
 	}
 
 	auto result_chunk = data.res->Fetch();

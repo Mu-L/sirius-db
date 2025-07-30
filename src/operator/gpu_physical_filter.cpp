@@ -58,7 +58,8 @@ GPUPhysicalFilter::Execute(GPUIntermediateRelation &input_relation, GPUIntermedi
   
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-	SIRIUS_LOG_DEBUG("Filter time: {:.2f} ms", duration.count()/1000.0);
+	SIRIUS_LOG_DEBUG("Measure Filter time: {:.2f} ms", duration.count()/1000.0);
+	printf("Measure Filter time: %.2f ms\n", duration.count()/1000.0);
 	return OperatorResultType::FINISHED;
 }
 

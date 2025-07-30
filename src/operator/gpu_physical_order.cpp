@@ -200,7 +200,8 @@ GPUPhysicalOrder::Sink(GPUIntermediateRelation &input_relation) const {
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    SIRIUS_LOG_DEBUG("Order by Sink time: {:.2f} ms", duration.count()/1000.0);
+    SIRIUS_LOG_DEBUG("Measure Order by Sink time: {:.2f} ms", duration.count()/1000.0);
+    printf("Measure Order by time: %.2f ms\n", duration.count()/1000.0);
     return SinkResultType::FINISHED;
 }
 

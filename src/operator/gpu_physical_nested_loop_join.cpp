@@ -340,7 +340,8 @@ GPUPhysicalNestedLoopJoin::ResolveComplexJoin(GPUIntermediateRelation &input_rel
 
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-	SIRIUS_LOG_DEBUG("Nested loop join Execute time: {:.2f} ms", duration.count()/1000.0);
+	SIRIUS_LOG_DEBUG("Measure Nested loop join Execute time: {:.2f} ms", duration.count()/1000.0);
+	printf("Measure Join time: %.2f ms\n", duration.count()/1000.0);
 
 	return OperatorResultType::FINISHED;
 }
