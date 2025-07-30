@@ -687,8 +687,8 @@ GPUPhysicalGroupedAggregate::Sink(GPUIntermediateRelation& input_relation) const
 	uint64_t count[1];
 	if (aggregates.size() == 0) {
 		// if (can_use_sirius_impl) {
-			HandleDuplicateElimination(group_by_column, gpuBufferManager, num_group_keys);
-			// HandleDuplicateEliminationCuDF(group_by_column, gpuBufferManager, num_group_keys);
+			// HandleDuplicateElimination(group_by_column, gpuBufferManager, num_group_keys);
+			HandleDuplicateEliminationCuDF(group_by_column, gpuBufferManager, num_group_keys);
 		// } else {
 			// HandleGroupByAggregateCuDF(group_by_column, aggregate_column, gpuBufferManager, aggregates, num_group_keys);
 		// }
@@ -871,8 +871,8 @@ GPUPhysicalGroupedAggregate::SinkDistinctGrouping(GPUIntermediateRelation& input
 	if (group_by_column[0]->column_length > INT32_MAX || distinct_aggregate_columns[0]->column_length > INT32_MAX) {
 		throw NotImplementedException("Group by column length or distinct aggregate column length is too large for CuDF");
 	} else {
-		// HandleDistinctGroupByCuDF(group_by_column, distinct_aggregate_columns, gpuBufferManager, distinct_info, num_group_keys);
-		HandleDistinctGroupBy(group_by_column, distinct_aggregate_columns, gpuBufferManager, distinct_info, num_group_keys);
+		HandleDistinctGroupByCuDF(group_by_column, distinct_aggregate_columns, gpuBufferManager, distinct_info, num_group_keys);
+		// HandleDistinctGroupBy(group_by_column, distinct_aggregate_columns, gpuBufferManager, distinct_info, num_group_keys);
 	}
 
 	// Reading groupby columns based on the grouping set

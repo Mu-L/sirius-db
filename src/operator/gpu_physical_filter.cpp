@@ -24,8 +24,8 @@
 #include "duckdb/planner/expression/bound_case_expression.hpp"
 #include "duckdb/planner/expression/bound_function_expression.hpp"
 #include "duckdb/planner/expression/bound_operator_expression.hpp"
-// #include "expression_executor/gpu_expression_executor.hpp"
-#include "gpu_expression_executor.hpp"
+#include "expression_executor/gpu_expression_executor.hpp"
+// #include "gpu_expression_executor.hpp"
 #include "log/logging.hpp"
 
 namespace duckdb {
@@ -53,14 +53,14 @@ GPUPhysicalFilter::Execute(GPUIntermediateRelation &input_relation, GPUIntermedi
 	SIRIUS_LOG_DEBUG("Executing expression {}", expression->ToString());
  	auto start = std::chrono::high_resolution_clock::now();
 
-	 // The old executor...
-    // GPUExpressionExecutor old_gpu_expression_executor;
-	GPUExpressionExecutor* old_gpu_expression_executor = new GPUExpressionExecutor();
-    old_gpu_expression_executor->FilterRecursiveExpression(input_relation, output_relation, *expression, 0);
+	//  // The old executor...
+    // // GPUExpressionExecutor old_gpu_expression_executor;
+	// GPUExpressionExecutor* old_gpu_expression_executor = new GPUExpressionExecutor();
+    // old_gpu_expression_executor->FilterRecursiveExpression(input_relation, output_relation, *expression, 0);
 
 	// The new executor...
-	// sirius::GpuExpressionExecutor gpu_expression_executor(*expression.get());
-	// gpu_expression_executor.Select(input_relation, output_relation);
+	sirius::GpuExpressionExecutor gpu_expression_executor(*expression.get());
+	gpu_expression_executor.Select(input_relation, output_relation);
   
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);

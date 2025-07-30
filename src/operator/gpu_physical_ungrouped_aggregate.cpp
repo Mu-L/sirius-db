@@ -259,8 +259,8 @@ GPUPhysicalUngroupedAggregate::Sink(GPUIntermediateRelation &input_relation) con
 	if (aggregate_column[0]->column_length > INT32_MAX) {
 		throw NotImplementedException("Column length greater than INT32_MAX is not supported");
 	} else {
-		// HandleAggregateExpressionCuDF(aggregate_column, gpuBufferManager, aggregates);
-		HandleAggregateExpression(aggregate_column, gpuBufferManager, aggregates);
+		HandleAggregateExpressionCuDF(aggregate_column, gpuBufferManager, aggregates);
+		// HandleAggregateExpression(aggregate_column, gpuBufferManager, aggregates);
 	}
 
 	for (int aggr_idx = 0; aggr_idx < aggregates.size(); aggr_idx++) {

@@ -317,8 +317,8 @@ GPUPhysicalNestedLoopJoin::ResolveComplexJoin(GPUIntermediateRelation &input_rel
 	if (!all_int64 && !all_float64) {
 		// Not supported by Sirius implementation, use cudf instead
 		if (join_type == JoinType::INNER) {
-			// cudf_mixed_or_conditional_inner_join(left_keys, right_keys, conditions, join_type, row_ids_left, row_ids_right, count);
-			HandleNestedLoopJoin(left_keys, right_keys, count, row_ids_left, row_ids_right, conditions, join_type, gpuBufferManager);
+			cudf_mixed_or_conditional_inner_join(left_keys, right_keys, conditions, join_type, row_ids_left, row_ids_right, count);
+			// HandleNestedLoopJoin(left_keys, right_keys, count, row_ids_left, row_ids_right, conditions, join_type, gpuBufferManager);
 		} else {
 			throw NotImplementedException("Unimplemented type for complex nested loop join using cudf!");
     }
