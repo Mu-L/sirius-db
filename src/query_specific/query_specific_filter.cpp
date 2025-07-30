@@ -65,10 +65,10 @@ GPUExpressionExecutor::HandlingSpecificFilter(GPUIntermediateRelation& input_rel
                                     uint64_t p_size_val[3] = {5, 10, 15};
                                     uint64_t p_container_val[12] = {0, 1, 4, 5, 17, 18, 20, 21, 8, 9, 12, 13};
 
-                                    shared_ptr<GPUColumn> materialized_brand = HandleMaterializeExpression(input_relation.columns[p_brand], first.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                                    shared_ptr<GPUColumn> materialized_size = HandleMaterializeExpression(input_relation.columns[p_size], second.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                                    shared_ptr<GPUColumn> materialized_quantity = HandleMaterializeExpression(input_relation.columns[l_quantity], third.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                                    shared_ptr<GPUColumn> materialized_container = HandleMaterializeExpression(input_relation.columns[p_container], fourth.children[0]->Cast<BoundReferenceExpression>(), gpuBufferManager);
+                                    shared_ptr<GPUColumn> materialized_brand = HandleMaterializeExpression(input_relation.columns[p_brand], gpuBufferManager);
+                                    shared_ptr<GPUColumn> materialized_size = HandleMaterializeExpression(input_relation.columns[p_size], gpuBufferManager);
+                                    shared_ptr<GPUColumn> materialized_quantity = HandleMaterializeExpression(input_relation.columns[l_quantity], gpuBufferManager);
+                                    shared_ptr<GPUColumn> materialized_container = HandleMaterializeExpression(input_relation.columns[p_container], gpuBufferManager);
 
                                     count = gpuBufferManager->customCudaMalloc<uint64_t>(1, 0, 0);
                                     uint64_t* a = reinterpret_cast<uint64_t*> (materialized_brand->data_wrapper.data);
@@ -102,8 +102,8 @@ GPUExpressionExecutor::HandlingSpecificFilter(GPUIntermediateRelation& input_rel
                         uint64_t val[2];
                         val[0] = constant1;
                         val[1] = constant2;
-                        shared_ptr<GPUColumn> materialized_nkey1 = HandleMaterializeExpression(input_relation.columns[n_nationkey1], first.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                        shared_ptr<GPUColumn> materialized_nkey2 = HandleMaterializeExpression(input_relation.columns[n_nationkey2], second.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
+                        shared_ptr<GPUColumn> materialized_nkey1 = HandleMaterializeExpression(input_relation.columns[n_nationkey1], gpuBufferManager);
+                        shared_ptr<GPUColumn> materialized_nkey2 = HandleMaterializeExpression(input_relation.columns[n_nationkey2], gpuBufferManager);
 
                         count = gpuBufferManager->customCudaMalloc<uint64_t>(1, 0, 0);
                         uint64_t* a = reinterpret_cast<uint64_t*> (materialized_nkey1->data_wrapper.data);
@@ -130,8 +130,8 @@ GPUExpressionExecutor::HandlingSpecificFilter(GPUIntermediateRelation& input_rel
 
                             uint64_t val[4] = {6, 7, 7, 6};
 
-                            shared_ptr<GPUColumn> materialized_nkey1 = HandleMaterializeExpression(input_relation.columns[n_nationkey1], first.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                            shared_ptr<GPUColumn> materialized_nkey2 = HandleMaterializeExpression(input_relation.columns[n_nationkey2], second.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
+                            shared_ptr<GPUColumn> materialized_nkey1 = HandleMaterializeExpression(input_relation.columns[n_nationkey1], gpuBufferManager);
+                            shared_ptr<GPUColumn> materialized_nkey2 = HandleMaterializeExpression(input_relation.columns[n_nationkey2], gpuBufferManager);
 
                             count = gpuBufferManager->customCudaMalloc<uint64_t>(1, 0, 0);
                             uint64_t* a = reinterpret_cast<uint64_t*> (materialized_nkey1->data_wrapper.data);
@@ -192,8 +192,8 @@ GPUExpressionExecutor::HandlingSpecificFilter(GPUIntermediateRelation& input_rel
                     uint64_t p_type_val[2] = {65, 70};
                     uint64_t p_size_val[8] = {49, 14, 23, 45, 19, 3, 36, 9};
 
-                    shared_ptr<GPUColumn> materialized_type = HandleMaterializeExpression(input_relation.columns[p_type], second_temp.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                    shared_ptr<GPUColumn> materialized_size = HandleMaterializeExpression(input_relation.columns[p_size], third.children[0]->Cast<BoundReferenceExpression>(), gpuBufferManager);
+                    shared_ptr<GPUColumn> materialized_type = HandleMaterializeExpression(input_relation.columns[p_type], gpuBufferManager);
+                    shared_ptr<GPUColumn> materialized_size = HandleMaterializeExpression(input_relation.columns[p_size], gpuBufferManager);
 
                     count = gpuBufferManager->customCudaMalloc<uint64_t>(1, 0, 0);
                     uint64_t* a = reinterpret_cast<uint64_t*> (materialized_type->data_wrapper.data);
@@ -223,10 +223,10 @@ GPUExpressionExecutor::HandlingSpecificFilter(GPUIntermediateRelation& input_rel
 
                     uint64_t l_shipmode_val[2] = {4, 6};
 
-                    shared_ptr<GPUColumn> materialized_commitdate = HandleMaterializeExpression(input_relation.columns[l_commitdate], first.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                    shared_ptr<GPUColumn> materialized_receiptdate = HandleMaterializeExpression(input_relation.columns[l_receiptdate], first.right->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                    shared_ptr<GPUColumn> materialized_shipdate = HandleMaterializeExpression(input_relation.columns[l_shipdate], second.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                    shared_ptr<GPUColumn> materialized_shipmode = HandleMaterializeExpression(input_relation.columns[l_shipmode], third.children[0]->Cast<BoundReferenceExpression>(), gpuBufferManager);
+                    shared_ptr<GPUColumn> materialized_commitdate = HandleMaterializeExpression(input_relation.columns[l_commitdate], gpuBufferManager);
+                    shared_ptr<GPUColumn> materialized_receiptdate = HandleMaterializeExpression(input_relation.columns[l_receiptdate], gpuBufferManager);
+                    shared_ptr<GPUColumn> materialized_shipdate = HandleMaterializeExpression(input_relation.columns[l_shipdate], gpuBufferManager);
+                    shared_ptr<GPUColumn> materialized_shipmode = HandleMaterializeExpression(input_relation.columns[l_shipmode], gpuBufferManager);
 
                     count = gpuBufferManager->customCudaMalloc<uint64_t>(1, 0, 0);
                     uint64_t* a = reinterpret_cast<uint64_t*> (materialized_commitdate->data_wrapper.data);
@@ -259,7 +259,7 @@ GPUExpressionExecutor::HandlingSpecificFilter(GPUIntermediateRelation& input_rel
                                     auto p_type = left_function_expr.children[0]->Cast<BoundReferenceExpression>().index;
                                     uint64_t p_type_val = 0;
 
-                                    shared_ptr<GPUColumn> materialized_type = HandleMaterializeExpression(input_relation.columns[p_type], left_function_expr.children[0]->Cast<BoundReferenceExpression>(), gpuBufferManager);
+                                    shared_ptr<GPUColumn> materialized_type = HandleMaterializeExpression(input_relation.columns[p_type], gpuBufferManager);
 
                                     count = gpuBufferManager->customCudaMalloc<uint64_t>(1, 0, 0);
                                     uint64_t* a = reinterpret_cast<uint64_t*> (materialized_type->data_wrapper.data);
@@ -285,7 +285,7 @@ GPUExpressionExecutor::HandlingSpecificFilter(GPUIntermediateRelation& input_rel
                     shared_ptr<GPUColumn> input_column = input_relation.columns[bound_ref.index];
                     uint64_t start_idx = 0;
                     uint64_t length = 2;
-                    shared_ptr<GPUColumn> materialized_column = HandleMaterializeExpression(input_column, bound_ref, gpuBufferManager);
+                    shared_ptr<GPUColumn> materialized_column = HandleMaterializeExpression(input_column, gpuBufferManager);
                     size_t size = materialized_column->column_length;
                     uint8_t* a = materialized_column->data_wrapper.data;
                     uint64_t* offset = materialized_column->data_wrapper.offset;
@@ -300,7 +300,7 @@ GPUExpressionExecutor::HandlingSpecificFilter(GPUIntermediateRelation& input_rel
                     shared_ptr<GPUColumn> input_column = input_relation.columns[bound_ref.index];
                     uint64_t start_idx = 0;
                     uint64_t length = 2;
-                    shared_ptr<GPUColumn> materialized_column = HandleMaterializeExpression(input_column, bound_ref, gpuBufferManager);
+                    shared_ptr<GPUColumn> materialized_column = HandleMaterializeExpression(input_column, gpuBufferManager);
                     size_t size = materialized_column->column_length;
                     uint8_t* a = materialized_column->data_wrapper.data;
                     uint64_t* offset = materialized_column->data_wrapper.offset;

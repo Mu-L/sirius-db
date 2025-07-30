@@ -57,12 +57,14 @@ set(EXTENSION_SOURCES
   src/gpu_pipeline.cpp
   src/gpu_meta_pipeline.cpp
   src/gpu_physical_plan_generator.cpp
+  src/gpu_expression_executor.cpp
   src/gpu_buffer_manager.cpp
   src/gpu_columns.cpp
   src/gpu_query_result.cpp
 )
 add_subdirectory(src/operator)
 add_subdirectory(src/plan)
+add_subdirectory(src/query_specific)
 
 set(CUDA_SOURCES 
   src/cuda/communication.cu 
@@ -73,6 +75,7 @@ set(CUDA_SOURCES
 add_subdirectory(src/cuda/operator)
 add_subdirectory(src/cuda/cudf)
 add_subdirectory(src/cuda/expression_executor)
+add_subdirectory(src/cuda/query_specific)
 add_subdirectory(src/expression_executor)
 
 set(CMAKE_CUDA_STANDARD 17)

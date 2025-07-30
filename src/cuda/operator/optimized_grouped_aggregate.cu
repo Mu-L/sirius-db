@@ -545,7 +545,8 @@ void optimizedGroupedStringAggregate(uint8_t **keys, uint8_t **aggregate_keys, u
         // Materialize the string column
         uint8_t* result; uint64_t* result_offset; uint64_t* new_num_bytes;
         // void materializeString(uint8_t* data, uint64_t* offset, uint8_t* &result, uint64_t* &result_offset, uint64_t* row_ids, uint64_t* &result_bytes, uint64_t result_len, uint64_t input_size, uint64_t input_bytes)
-        materializeString(group_key_chars, group_key_offsets, result, result_offset, d_original_row_ids, new_num_bytes, num_groups);
+        cudf::bitmask_type* out_mask = nullptr;
+        materializeString(group_key_chars, group_key_offsets, result, result_offset, d_original_row_ids, new_num_bytes, num_groups, nullptr, out_mask);
 
         // Write back the result
         keys[i] = result;
@@ -583,49 +584,49 @@ void optimizedGroupedStringAggregate<double>(uint8_t **keys, uint8_t **aggregate
 template
 void optimizedGroupedStringAggregate<uint64_t>(uint8_t **keys, uint8_t **aggregate_keys, uint64_t** offset, uint64_t* num_bytes, uint64_t* count, uint64_t N, uint64_t num_keys, uint64_t num_aggregates, int* agg_mode);
 
-__global__ void add_offset(uint64_t* a, uint64_t* b, uint64_t offset, uint64_t N) {
-    uint64_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < N) {
-        a[idx] = b[idx] + offset;
-    }
-}
+// __global__ void add_offset2(uint64_t* a, uint64_t* b, uint64_t offset, uint64_t N) {
+//     uint64_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+//     if (idx < N) {
+//         a[idx] = b[idx] + offset;
+//     }
+// }
 
-void combineStrings(uint8_t* a, uint8_t* b, uint8_t*& c, 
-        uint64_t* offset_a, uint64_t* offset_b, uint64_t*& offset_c, 
-        uint64_t num_bytes_a, uint64_t num_bytes_b, uint64_t N_a, uint64_t N_b) {
-    CHECK_ERROR();
-    if (N_a == 0 || N_b == 0) {
-        SIRIUS_LOG_DEBUG("Input size is 0");
-        return;
-    }
-    GPUBufferManager* gpuBufferManager = &(GPUBufferManager::GetInstance());
-    c = gpuBufferManager->customCudaMalloc<uint8_t>(num_bytes_a + num_bytes_b, 0, 0);
-    offset_c = gpuBufferManager->customCudaMalloc<uint64_t>(N_a + N_b + 1, 0, 0);
-    cudaMemcpy(c, a, num_bytes_a * sizeof(uint8_t), cudaMemcpyDeviceToDevice);
-    cudaMemcpy(c + num_bytes_a, b, num_bytes_b * sizeof(uint8_t), cudaMemcpyDeviceToDevice);
+// void combineStrings(uint8_t* a, uint8_t* b, uint8_t*& c, 
+//         uint64_t* offset_a, uint64_t* offset_b, uint64_t*& offset_c, 
+//         uint64_t num_bytes_a, uint64_t num_bytes_b, uint64_t N_a, uint64_t N_b) {
+//     CHECK_ERROR();
+//     if (N_a == 0 || N_b == 0) {
+//         SIRIUS_LOG_DEBUG("Input size is 0");
+//         return;
+//     }
+//     GPUBufferManager* gpuBufferManager = &(GPUBufferManager::GetInstance());
+//     c = gpuBufferManager->customCudaMalloc<uint8_t>(num_bytes_a + num_bytes_b, 0, 0);
+//     offset_c = gpuBufferManager->customCudaMalloc<uint64_t>(N_a + N_b + 1, 0, 0);
+//     cudaMemcpy(c, a, num_bytes_a * sizeof(uint8_t), cudaMemcpyDeviceToDevice);
+//     cudaMemcpy(c + num_bytes_a, b, num_bytes_b * sizeof(uint8_t), cudaMemcpyDeviceToDevice);
 
-    cudaMemcpy(offset_c, offset_a, N_a * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
-    add_offset<<<((N_b + 1) + BLOCK_THREADS - 1)/(BLOCK_THREADS), BLOCK_THREADS>>>(offset_c + N_a, offset_b, num_bytes_a, N_b + 1);
-    CHECK_ERROR();
-    cudaDeviceSynchronize();
-}
+//     cudaMemcpy(offset_c, offset_a, N_a * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
+//     add_offset2<<<((N_b + 1) + BLOCK_THREADS - 1)/(BLOCK_THREADS), BLOCK_THREADS>>>(offset_c + N_a, offset_b, num_bytes_a, N_b + 1);
+//     CHECK_ERROR();
+//     cudaDeviceSynchronize();
+// }
 
-__global__ void populate_fixed_size_offsets(uint64_t* offsets, uint64_t record_size, uint64_t num_records) {
-    uint64_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < num_records) {
-        offsets[idx] = idx * record_size;
-    }
-}
+// __global__ void populate_fixed_size_offsets(uint64_t* offsets, uint64_t record_size, uint64_t num_records) {
+//     uint64_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+//     if (idx < num_records) {
+//         offsets[idx] = idx * record_size;
+//     }
+// }
 
-uint64_t* createFixedSizeOffsets(size_t record_size, uint64_t num_rows) {
-    // Create and populate offsets array
-    uint64_t records_to_populate = num_rows + 1;
-    GPUBufferManager* gpuBufferManager = &(GPUBufferManager::GetInstance());
-    uint64_t* d_offsets = gpuBufferManager->customCudaMalloc<uint64_t>(records_to_populate, 0, 0);
+// uint64_t* createFixedSizeOffsets(size_t record_size, uint64_t num_rows) {
+//     // Create and populate offsets array
+//     uint64_t records_to_populate = num_rows + 1;
+//     GPUBufferManager* gpuBufferManager = &(GPUBufferManager::GetInstance());
+//     uint64_t* d_offsets = gpuBufferManager->customCudaMalloc<uint64_t>(records_to_populate, 0, 0);
 
-    uint64_t num_blocks = (records_to_populate + BLOCK_THREADS - 1)/BLOCK_THREADS;
-    populate_fixed_size_offsets<<<num_blocks, BLOCK_THREADS>>>(d_offsets, static_cast<uint64_t>(record_size), records_to_populate);
-    return d_offsets;
-}
+//     uint64_t num_blocks = (records_to_populate + BLOCK_THREADS - 1)/BLOCK_THREADS;
+//     populate_fixed_size_offsets<<<num_blocks, BLOCK_THREADS>>>(d_offsets, static_cast<uint64_t>(record_size), records_to_populate);
+//     return d_offsets;
+// }
 
 }

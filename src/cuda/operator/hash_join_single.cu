@@ -241,6 +241,7 @@ void probeHashTableSingleMatch(uint8_t **keys, unsigned long long* ht, uint64_t 
         return;
     }
     SIRIUS_LOG_DEBUG("Launching Probe Kernel Unique Join");
+    printf("Launching Probe Kernel Unique Join\n");
     SETUP_TIMING();
     START_TIMER();
     count = gpuBufferManager->customCudaMalloc<uint64_t>(1, 0, 0);

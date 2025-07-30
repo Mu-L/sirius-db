@@ -45,8 +45,8 @@ GPUExpressionExecutor::HandlingSpecificProjection(GPUIntermediateRelation& input
 				auto &then_expr = expr.case_checks[0].then_expr->Cast<BoundReferenceExpression>();
 				auto volume = then_expr.index;
 
-                auto materialized_nation = HandleMaterializeExpression(input_relation.columns[nation], when_expr.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-                auto materialized_volume = HandleMaterializeExpression(input_relation.columns[volume], then_expr, gpuBufferManager);
+                auto materialized_nation = HandleMaterializeExpression(input_relation.columns[nation], gpuBufferManager);
+                auto materialized_volume = HandleMaterializeExpression(input_relation.columns[volume], gpuBufferManager);
 
                 uint64_t* a = reinterpret_cast<uint64_t*> (materialized_nation->data_wrapper.data);
                 double* b = reinterpret_cast<double*> (materialized_volume->data_wrapper.data);
@@ -94,9 +94,9 @@ GPUExpressionExecutor::HandlingSpecificProjection(GPUIntermediateRelation& input
 					uint64_t p_type_value1 = 125;
 					uint64_t p_type_value2 = 150;
 
-					auto materialized_type = HandleMaterializeExpression(input_relation.columns[p_type], when_expr.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
-					auto materialized_extendedprice = HandleMaterializeExpression(input_relation.columns[l_extendedprice], then_expr.children[0]->Cast<BoundReferenceExpression>(), gpuBufferManager);
-					auto materialized_discount = HandleMaterializeExpression(input_relation.columns[l_discount], substract_expr.children[1]->Cast<BoundReferenceExpression>(), gpuBufferManager);
+					auto materialized_type = HandleMaterializeExpression(input_relation.columns[p_type], gpuBufferManager);
+					auto materialized_extendedprice = HandleMaterializeExpression(input_relation.columns[l_extendedprice], gpuBufferManager);
+					auto materialized_discount = HandleMaterializeExpression(input_relation.columns[l_discount], gpuBufferManager);
 
 					uint64_t* a = reinterpret_cast<uint64_t*> (materialized_type->data_wrapper.data);
 					double* b = reinterpret_cast<double*> (materialized_extendedprice->data_wrapper.data);
@@ -117,7 +117,7 @@ GPUExpressionExecutor::HandlingSpecificProjection(GPUIntermediateRelation& input
 					auto &compare_expr = when_expr.children[0]->Cast<BoundComparisonExpression>();
 					auto o_orderpriority = compare_expr.left->Cast<BoundReferenceExpression>().index;
 
-                    auto materialized_orderpriority = HandleMaterializeExpression(input_relation.columns[o_orderpriority], compare_expr.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
+                    auto materialized_orderpriority = HandleMaterializeExpression(input_relation.columns[o_orderpriority], gpuBufferManager);
                     uint64_t* a = reinterpret_cast<uint64_t*> (materialized_orderpriority->data_wrapper.data);
                     size_t size = materialized_orderpriority->column_length;
                     double* out = gpuBufferManager->customCudaMalloc<double>(size, 0, 0);
@@ -132,7 +132,7 @@ GPUExpressionExecutor::HandlingSpecificProjection(GPUIntermediateRelation& input
 					auto &compare_expr = when_expr.children[0]->Cast<BoundComparisonExpression>();
 					auto o_orderpriority = compare_expr.left->Cast<BoundReferenceExpression>().index;
 
-                    auto materialized_orderpriority = HandleMaterializeExpression(input_relation.columns[o_orderpriority], compare_expr.left->Cast<BoundReferenceExpression>(), gpuBufferManager);
+                    auto materialized_orderpriority = HandleMaterializeExpression(input_relation.columns[o_orderpriority], gpuBufferManager);
                     uint64_t* a = reinterpret_cast<uint64_t*> (materialized_orderpriority->data_wrapper.data);
                     size_t size = materialized_orderpriority->column_length;
                     double* out = gpuBufferManager->customCudaMalloc<double>(size, 0, 0);
@@ -155,7 +155,7 @@ GPUExpressionExecutor::HandlingSpecificProjection(GPUIntermediateRelation& input
 				auto &cast_expr = expr.children[0]->Cast<BoundCastExpression>();
 				auto date = cast_expr.child->Cast<BoundReferenceExpression>().index;
 
-				auto materialized_date = HandleMaterializeExpression(input_relation.columns[date], cast_expr.child->Cast<BoundReferenceExpression>(), gpuBufferManager);
+				auto materialized_date = HandleMaterializeExpression(input_relation.columns[date], gpuBufferManager);
 				uint64_t* a = reinterpret_cast<uint64_t*> (materialized_date->data_wrapper.data);
 				size_t size = materialized_date->column_length;
 				uint64_t* out = gpuBufferManager->customCudaMalloc<uint64_t>(size, 0, 0);
@@ -178,8 +178,8 @@ GPUExpressionExecutor::HandlingSpecificProjection(GPUIntermediateRelation& input
 						SIRIUS_LOG_DEBUG("Projection expression of Q1");
 						auto l_tax = function_expr.children[1]->Cast<BoundReferenceExpression>().index;
 
-						auto materialize_4 = HandleMaterializeExpression(input_relation.columns[l_extendedprice_or_4], ref_expr, gpuBufferManager);
-						auto materialize_tax = HandleMaterializeExpression(input_relation.columns[l_tax], function_expr.children[1]->Cast<BoundReferenceExpression>(), gpuBufferManager);
+						auto materialize_4 = HandleMaterializeExpression(input_relation.columns[l_extendedprice_or_4], gpuBufferManager);
+						auto materialize_tax = HandleMaterializeExpression(input_relation.columns[l_tax], gpuBufferManager);
 						double* a = reinterpret_cast<double*> (materialize_4->data_wrapper.data);
 						double* b = reinterpret_cast<double*> (materialize_tax->data_wrapper.data);
 						size_t size = materialize_4->column_length;
@@ -194,8 +194,8 @@ GPUExpressionExecutor::HandlingSpecificProjection(GPUIntermediateRelation& input
 						SIRIUS_LOG_DEBUG("Common projection expression l_extendedprice * (1 - l_discount)");
 						auto l_discount = function_expr.children[1]->Cast<BoundReferenceExpression>().index;
 
-						auto materialize_extendedprice = HandleMaterializeExpression(input_relation.columns[l_extendedprice_or_4], ref_expr, gpuBufferManager);
-						auto materialize_discount = HandleMaterializeExpression(input_relation.columns[l_discount], function_expr.children[1]->Cast<BoundReferenceExpression>(), gpuBufferManager);
+						auto materialize_extendedprice = HandleMaterializeExpression(input_relation.columns[l_extendedprice_or_4], gpuBufferManager);
+						auto materialize_discount = HandleMaterializeExpression(input_relation.columns[l_discount], gpuBufferManager);
 						double* a = reinterpret_cast<double*> (materialize_extendedprice->data_wrapper.data);
 						double* b = reinterpret_cast<double*> (materialize_discount->data_wrapper.data);
 						size_t size = materialize_extendedprice->column_length;
@@ -218,10 +218,10 @@ GPUExpressionExecutor::HandlingSpecificProjection(GPUIntermediateRelation& input
 						auto ps_supplycost = right_function_expr.children[0]->Cast<BoundReferenceExpression>().index;
 						auto l_quantity = right_function_expr.children[1]->Cast<BoundReferenceExpression>().index;
 
-						auto materialize_extendedprice = HandleMaterializeExpression(input_relation.columns[l_extendedprice], left_function_expr.children[0]->Cast<BoundReferenceExpression>(), gpuBufferManager);
-						auto materialize_discount = HandleMaterializeExpression(input_relation.columns[l_discount], left_right_function_expr.children[1]->Cast<BoundReferenceExpression>(), gpuBufferManager);
-						auto materialize_supplycost = HandleMaterializeExpression(input_relation.columns[ps_supplycost], right_function_expr.children[0]->Cast<BoundReferenceExpression>(), gpuBufferManager);
-						auto materialize_quantity = HandleMaterializeExpression(input_relation.columns[l_quantity], right_function_expr.children[1]->Cast<BoundReferenceExpression>(), gpuBufferManager);
+						auto materialize_extendedprice = HandleMaterializeExpression(input_relation.columns[l_extendedprice], gpuBufferManager);
+						auto materialize_discount = HandleMaterializeExpression(input_relation.columns[l_discount], gpuBufferManager);
+						auto materialize_supplycost = HandleMaterializeExpression(input_relation.columns[ps_supplycost], gpuBufferManager);
+						auto materialize_quantity = HandleMaterializeExpression(input_relation.columns[l_quantity], gpuBufferManager);
 
 						double* a = reinterpret_cast<double*> (materialize_extendedprice->data_wrapper.data);
 						double* b = reinterpret_cast<double*> (materialize_discount->data_wrapper.data);
@@ -245,8 +245,8 @@ GPUExpressionExecutor::HandlingSpecificProjection(GPUIntermediateRelation& input
 					auto value = left_function_expr.children[1]->Cast<BoundConstantExpression>().value.GetValue<double>();
 					auto sum = expr.children[1]->Cast<BoundReferenceExpression>().index;
 
-					auto materialize_a = HandleMaterializeExpression(input_relation.columns[sum_case], left_function_expr.children[0]->Cast<BoundReferenceExpression>(), gpuBufferManager);
-					auto materialize_b = HandleMaterializeExpression(input_relation.columns[sum], expr.children[1]->Cast<BoundReferenceExpression>(), gpuBufferManager);
+					auto materialize_a = HandleMaterializeExpression(input_relation.columns[sum_case], gpuBufferManager);
+					auto materialize_b = HandleMaterializeExpression(input_relation.columns[sum], gpuBufferManager);
 
 					double* a = reinterpret_cast<double*> (materialize_a->data_wrapper.data);
 					double* b = reinterpret_cast<double*> (materialize_b->data_wrapper.data);

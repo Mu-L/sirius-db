@@ -51,12 +51,12 @@ ResolveTypeProbeExpression(vector<shared_ptr<GPUColumn>> &probe_keys, uint64_t* 
 
 	//TODO: Need to handle special case for unique keys for better performance
 	if (join_type == JoinType::INNER) {
-		// if (unique_build_keys) {
-		// 	probeHashTableSingleMatch<T>(probe_data, ht, ht_len, row_ids_left, row_ids_right, count, size, condition_mode, num_keys, 0);
-		// } else {
-		// 	probeHashTable<T>(probe_data, ht, ht_len, row_ids_left, row_ids_right, count, size, condition_mode, num_keys, false);
-		// }
-		throw NotImplementedException("Unsupported join type: INNER");
+		if (unique_build_keys) {
+			probeHashTableSingleMatch<T>(probe_data, ht, ht_len, row_ids_left, row_ids_right, count, size, condition_mode, num_keys, 0);
+		} else {
+			probeHashTable<T>(probe_data, ht, ht_len, row_ids_left, row_ids_right, count, size, condition_mode, num_keys, false);
+		}
+		// throw NotImplementedException("Unsupported join type: INNER");
 	} else if (join_type == JoinType::SEMI) {
 		probeHashTableSingleMatch<T>(probe_data, ht, ht_len, row_ids_left, row_ids_right, count, size, condition_mode, num_keys, 1);
 	} else if (join_type == JoinType::ANTI) {
@@ -436,39 +436,40 @@ GPUPhysicalHashJoin::Execute(GPUIntermediateRelation &input_relation, GPUInterme
 	SIRIUS_LOG_DEBUG("Probing hash table");
 	if (join_type == JoinType::INNER) {
 		// check if there is a non-equality condition
-		vector<shared_ptr<GPUColumn>> build_key(conditions.size());
-		for (int cond_idx = 0; cond_idx < conditions.size(); cond_idx++) {
-			build_key[cond_idx] = materialized_build_key->columns[cond_idx];
-		}
-		for (int col = 0; col < conditions.size(); col++) {
-			// if types is VARCHAR, check the number of bytes
-			if (build_key[col]->data_wrapper.type.id() == GPUColumnTypeId::VARCHAR) {
-				if (build_key[col]->data_wrapper.num_bytes > INT32_MAX) {
-					throw NotImplementedException("String column size greater than INT32_MAX is not supported");
-				}
-			}
-			if (probe_key[col]->data_wrapper.type.id() == GPUColumnTypeId::VARCHAR) {
-				if (probe_key[col]->data_wrapper.num_bytes > INT32_MAX) {
-					throw NotImplementedException("String column size greater than INT32_MAX is not supported");
-				}
-			}
-		}
-		if (build_key[0]->column_length > INT32_MAX || probe_key[0]->column_length > INT32_MAX) {
-   			throw NotImplementedException("Column length greater than INT32_MAX is not supported");
-		} else {
-			bool has_non_equality_condition = false;
-			for (idx_t cond_idx = 0; cond_idx < conditions.size(); cond_idx++) {
-				if (conditions[cond_idx].comparison != ExpressionType::COMPARE_EQUAL && conditions[cond_idx].comparison != ExpressionType::COMPARE_NOT_DISTINCT_FROM) {
-					has_non_equality_condition = true;
-					break;
-				}
-			}
-			if (!has_non_equality_condition) {
-				cudf_hash_inner_join(probe_key, build_key, conditions.size(), row_ids_left, row_ids_right, count);
-			} else {
-				cudf_mixed_or_conditional_inner_join(probe_key, build_key, conditions, join_type, row_ids_left, row_ids_right, count);
-			}
-		}
+		// vector<shared_ptr<GPUColumn>> build_key(conditions.size());
+		// for (int cond_idx = 0; cond_idx < conditions.size(); cond_idx++) {
+		// 	build_key[cond_idx] = materialized_build_key->columns[cond_idx];
+		// }
+		// for (int col = 0; col < conditions.size(); col++) {
+		// 	// if types is VARCHAR, check the number of bytes
+		// 	if (build_key[col]->data_wrapper.type.id() == GPUColumnTypeId::VARCHAR) {
+		// 		if (build_key[col]->data_wrapper.num_bytes > INT32_MAX) {
+		// 			throw NotImplementedException("String column size greater than INT32_MAX is not supported");
+		// 		}
+		// 	}
+		// 	if (probe_key[col]->data_wrapper.type.id() == GPUColumnTypeId::VARCHAR) {
+		// 		if (probe_key[col]->data_wrapper.num_bytes > INT32_MAX) {
+		// 			throw NotImplementedException("String column size greater than INT32_MAX is not supported");
+		// 		}
+		// 	}
+		// }
+		// if (build_key[0]->column_length > INT32_MAX || probe_key[0]->column_length > INT32_MAX) {
+   		// 	throw NotImplementedException("Column length greater than INT32_MAX is not supported");
+		// } else {
+		// 	bool has_non_equality_condition = false;
+		// 	for (idx_t cond_idx = 0; cond_idx < conditions.size(); cond_idx++) {
+		// 		if (conditions[cond_idx].comparison != ExpressionType::COMPARE_EQUAL && conditions[cond_idx].comparison != ExpressionType::COMPARE_NOT_DISTINCT_FROM) {
+		// 			has_non_equality_condition = true;
+		// 			break;
+		// 		}
+		// 	}
+		// 	if (!has_non_equality_condition) {
+		// 		cudf_hash_inner_join(probe_key, build_key, conditions.size(), row_ids_left, row_ids_right, count);
+		// 	} else {
+		// 		cudf_mixed_or_conditional_inner_join(probe_key, build_key, conditions, join_type, row_ids_left, row_ids_right, count);
+		// 	}
+		// }
+		HandleProbeExpression(probe_key, count, row_ids_left, row_ids_right, gpu_hash_table, ht_len, conditions, join_type, unique_build_keys, gpuBufferManager);
 	} else if (join_type == JoinType::SEMI || join_type == JoinType::ANTI || join_type == JoinType::OUTER || join_type == JoinType::RIGHT) {
 		HandleProbeExpression(probe_key, count, row_ids_left, row_ids_right, gpu_hash_table, ht_len, conditions, join_type, unique_build_keys, gpuBufferManager);
 		// if (count[0] == 0) throw NotImplementedException("No match found");
@@ -627,6 +628,7 @@ GPUPhysicalHashJoin::Sink(GPUIntermediateRelation &input_relation) const {
 		// if (!has_non_equality_condition) {
 		// 	cudf_build(build_keys, cudf_hash_table, conditions.size());
 		// }
+		HandleBuildExpression(build_keys, gpu_hash_table, ht_len, conditions, join_type, gpuBufferManager);
 	} else {
 		HandleBuildExpression(build_keys, gpu_hash_table, ht_len, conditions, join_type, gpuBufferManager);
 	}
